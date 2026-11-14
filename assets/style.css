@@ -47,6 +47,10 @@ h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.1; margin: 0 0 18px; lett
 .hero-art { display: flex; justify-content: center; }
 .hero-art img { width: 100%; max-width: 300px; filter: drop-shadow(0 20px 40px rgba(37,99,235,.18)); }
 
+/* demo */
+.demo-section { padding: 0 0 24px; margin-top: -24px; }
+.demo-video { display: block; width: 100%; border-radius: 16px; border: 1px solid var(--line); box-shadow: 0 24px 60px rgba(15,23,42,.14); background: #fff; }
+
 /* sections */
 section { padding: 72px 0; }
 h2 { font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 12px; letter-spacing: -.02em; text-align: center; }
