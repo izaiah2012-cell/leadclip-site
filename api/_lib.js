@@ -4,11 +4,44 @@ const FREE_LIMIT = 15;
 const FOUNDING_LIMIT = 100;
 const EXTENSION_ORIGIN = "chrome-extension://dcmobmfcanclieokkkffndnefjagmhem";
 
+// Paddle sandbox prices (kept for reference, no longer used)
 const PRICES = {
   monthly: "pri_01m7dv131yn1qqqm1xb8adbzeq",
   yearly: "pri_01m7dv7q50c06yvna6sbba2qvd",
   founding: "pri_01m7dtj3th591b6t9aa2hgca1t"
 };
+
+// Stripe prices (test mode). Swap for live IDs at go-live.
+const STRIPE_PRICES = {
+  monthly: process.env.STRIPE_PRICE_MONTHLY || "price_1Ucv26AuhDoZqdULzQzSgUKo",
+  yearly: process.env.STRIPE_PRICE_YEARLY || "price_1UcvCfAuhDoZqdULmIMb4sf9",
+  founding: process.env.STRIPE_PRICE_FOUNDING || "price_1Ucv3TAuhDoZqdULEoU7I98s"
+};
+
+// ---------- Stripe API (form-encoded REST, no SDK needed) ----------
+function formEncode(obj, prefix, out = []) {
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === undefined || v === null) continue;
+    const key = prefix ? `${prefix}[${k}]` : k;
+    if (typeof v === "object") formEncode(v, key, out);
+    else out.push(`${encodeURIComponent(key)}=${encodeURIComponent(v)}`);
+  }
+  return out.join("&");
+}
+
+async function stripe(path, method = "GET", body) {
+  const res = await fetch(`https://api.stripe.com/v1${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: body ? formEncode(body) : undefined
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Stripe: ${data.error?.message || res.status}`);
+  return data;
+}
 
 const PADDLE_API =
   (process.env.PADDLE_ENV || "sandbox") === "production"
@@ -61,6 +94,8 @@ async function setUser(email, fields) {
 
 // Pro if lifetime, or an active / trialing / past_due (grace) subscription
 function isPro(user) {
+  // Paddle sandbox test records (ctm_…) no longer count now that payments run on Stripe
+  if (user.customerId && String(user.customerId).startsWith("ctm_")) return false;
   if (user.plan === "lifetime") return true;
   if (user.plan === "pro" && ["active", "trialing", "past_due"].includes(user.status)) return true;
   // cancelled but still inside the paid period
@@ -106,6 +141,6 @@ function cors(req, res) {
 }
 
 module.exports = {
-  FREE_LIMIT, FOUNDING_LIMIT, PRICES, redis, getUser, setUser, isPro,
+  FREE_LIMIT, FOUNDING_LIMIT, PRICES, STRIPE_PRICES, stripe, redis, getUser, setUser, isPro,
   usageKey, verifyGoogle, paddle, cors
 };
