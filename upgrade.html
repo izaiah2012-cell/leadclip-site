@@ -15,7 +15,6 @@
     .hidden { display: none !important; }
     .soldout { opacity: .55; }
   </style>
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 </head>
 <body>
   <header class="nav">
@@ -29,7 +28,7 @@
     <div class="wrap">
       <div id="choose">
         <h2>Upgrade LeadClip</h2>
-        <p class="sub">Unlimited clips to Google Sheets and Notion. Secure checkout by Paddle.</p>
+        <p class="sub">Unlimited clips to Google Sheets and Notion. Secure card checkout.</p>
 
         <div class="acct">
           <div id="acctKnown" class="hidden">Upgrading the LeadClip account <span class="who" id="acctEmail"></span></div>
@@ -63,7 +62,7 @@
             <button class="btn ghost" data-plan="founding">Become a founder</button>
           </div>
         </div>
-        <p class="note">Prices include VAT where it applies. 14-day money-back guarantee, see our <a href="/refunds">Refund Policy</a>. Payments are processed by Paddle.com, our Merchant of Record.</p>
+        <p class="note">Prices include VAT where it applies. 14-day money-back guarantee, see our <a href="/refunds">Refund Policy</a>.</p>
         <p class="note" id="err" style="color:#dc2626"></p>
       </div>
 
@@ -81,15 +80,21 @@
   const params = new URLSearchParams(location.search);
   let email = (params.get("email") || "").trim();
 
+  if (params.get("success")) {
+    $("doneEmail").textContent = email || "your account";
+    $("choose").classList.add("hidden");
+    $("success").classList.remove("hidden");
+    return;
+  }
+
   if (email) { $("acctEmail").textContent = email; $("acctKnown").classList.remove("hidden"); }
   else $("acctAsk").classList.remove("hidden");
 
   let cfg;
-  try {
-    cfg = await fetch("/api/account?action=config").then((r) => r.json());
-  } catch (e) { $("err").textContent = "Checkout is unavailable right now. Please try again shortly."; return; }
+  try { cfg = await fetch("/api/account?action=config").then((r) => r.json()); }
+  catch (e) { $("err").textContent = "Checkout is unavailable right now. Please try again shortly."; return; }
+  if (!cfg.ready) { $("err").textContent = "Checkout isn't switched on yet."; return; }
 
-  if (!cfg.clientToken) { $("err").textContent = "Checkout isn't switched on yet."; return; }
   if (cfg.foundingLeft <= 0) {
     $("foundingCard").classList.add("soldout");
     $("foundingLeft").textContent = "sold out";
@@ -98,33 +103,29 @@
     $("foundingLeft").textContent = `only ${cfg.foundingLeft} of 100 left`;
   }
 
-  if (cfg.environment === "sandbox") Paddle.Environment.set("sandbox");
-  Paddle.Initialize({
-    token: cfg.clientToken,
-    eventCallback: (ev) => {
-      if (ev.name === "checkout.completed") {
-        $("doneEmail").textContent = email;
-        $("choose").classList.add("hidden");
-        $("success").classList.remove("hidden");
-        setTimeout(() => Paddle.Checkout.close(), 2500);
-      }
-    }
-  });
-
   document.querySelectorAll("[data-plan]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       $("err").textContent = "";
       if (!email) {
         const v = $("emailInput").value.trim();
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { $("err").textContent = "Please enter the Google email you use with LeadClip."; $("emailInput").focus(); return; }
         email = v;
       }
-      Paddle.Checkout.open({
-        items: [{ priceId: cfg.prices[btn.dataset.plan], quantity: 1 }],
-        customer: { email },
-        customData: { email: email.toLowerCase() },
-        settings: { displayMode: "overlay", theme: "light", locale: "en" }
-      });
+      const label = btn.textContent;
+      btn.disabled = true; btn.textContent = "Opening checkout…";
+      try {
+        const r = await fetch("/api/account?action=checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: btn.dataset.plan, email })
+        });
+        const data = await r.json();
+        if (!r.ok || !data.url) throw new Error(data.error || "Couldn't start checkout.");
+        location.href = data.url;
+      } catch (e) {
+        $("err").textContent = e.message;
+        btn.disabled = false; btn.textContent = label;
+      }
     });
   });
 })();
