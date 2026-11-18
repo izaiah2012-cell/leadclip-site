@@ -22,7 +22,7 @@ const STRIPE_LIVE_PRICES = {
   yearly: "price_1UcwkaAk70HtJekAGgCUoNPR",
   founding: "price_1UcwmOAk70HtJekAtuhNMtYS"
 };
-const STRIPE_LIVE = String(process.env.STRIPE_SECRET_KEY || "").startsWith("sk_live_");
+const STRIPE_LIVE = /^(sk|rk)_live_/.test(String(process.env.STRIPE_SECRET_KEY || ""));
 const STRIPE_PRICES = STRIPE_LIVE ? STRIPE_LIVE_PRICES : STRIPE_TEST_PRICES;
 
 // ---------- Stripe API (form-encoded REST, no SDK needed) ----------
