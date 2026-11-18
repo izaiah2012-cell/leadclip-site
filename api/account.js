@@ -25,6 +25,7 @@ module.exports = async function handler(req, res) {
       const sold = Number(await L.redis("GET", "founding:sold")) || 0;
       return res.status(200).json({
         provider: "stripe",
+        mode: L.STRIPE_LIVE ? "live" : "test",
         ready: !!process.env.STRIPE_SECRET_KEY,
         foundingLeft: Math.max(0, L.FOUNDING_LIMIT - sold)
       });

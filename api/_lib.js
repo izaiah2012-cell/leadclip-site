@@ -11,12 +11,19 @@ const PRICES = {
   founding: "pri_01m7dtj3th591b6t9aa2hgca1t"
 };
 
-// Stripe prices (test mode). Swap for live IDs at go-live.
-const STRIPE_PRICES = {
-  monthly: process.env.STRIPE_PRICE_MONTHLY || "price_1Ucv26AuhDoZqdULzQzSgUKo",
-  yearly: process.env.STRIPE_PRICE_YEARLY || "price_1UcvCfAuhDoZqdULmIMb4sf9",
-  founding: process.env.STRIPE_PRICE_FOUNDING || "price_1Ucv3TAuhDoZqdULEoU7I98s"
+// Stripe prices. The live set is used automatically when STRIPE_SECRET_KEY is a live key.
+const STRIPE_TEST_PRICES = {
+  monthly: "price_1Ucv26AuhDoZqdULzQzSgUKo",
+  yearly: "price_1UcvCfAuhDoZqdULmIMb4sf9",
+  founding: "price_1Ucv3TAuhDoZqdULEoU7I98s"
 };
+const STRIPE_LIVE_PRICES = {
+  monthly: "price_1UcwifAk70HtJekA71sq0yK3",
+  yearly: "price_1UcwkaAk70HtJekAGgCUoNPR",
+  founding: "price_1UcwmOAk70HtJekAtuhNMtYS"
+};
+const STRIPE_LIVE = String(process.env.STRIPE_SECRET_KEY || "").startsWith("sk_live_");
+const STRIPE_PRICES = STRIPE_LIVE ? STRIPE_LIVE_PRICES : STRIPE_TEST_PRICES;
 
 // ---------- Stripe API (form-encoded REST, no SDK needed) ----------
 function formEncode(obj, prefix, out = []) {
@@ -141,6 +148,6 @@ function cors(req, res) {
 }
 
 module.exports = {
-  FREE_LIMIT, FOUNDING_LIMIT, PRICES, STRIPE_PRICES, stripe, redis, getUser, setUser, isPro,
+  FREE_LIMIT, FOUNDING_LIMIT, PRICES, STRIPE_PRICES, STRIPE_LIVE, stripe, redis, getUser, setUser, isPro,
   usageKey, verifyGoogle, paddle, cors
 };
