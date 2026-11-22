@@ -1,7 +1,7 @@
 // Shared helpers for LeadClip API (files starting with _ are not public routes on Vercel)
 
 const FREE_LIMIT = 15;
-const FOUNDING_LIMIT = 100;
+const FOUNDING_LIMIT = 50;
 const EXTENSION_ORIGIN = "chrome-extension://dcmobmfcanclieokkkffndnefjagmhem";
 
 // Paddle sandbox prices (kept for reference, no longer used)
@@ -11,19 +11,42 @@ const PRICES = {
   founding: "pri_01m7dtj3th591b6t9aa2hgca1t"
 };
 
-// Stripe prices. The live set is used automatically when STRIPE_SECRET_KEY is a live key.
+// Stripe prices by currency. The live set is used automatically when STRIPE_SECRET_KEY is a live key.
+// A currency with missing IDs is simply not offered.
 const STRIPE_TEST_PRICES = {
-  monthly: "price_1Ucv26AuhDoZqdULzQzSgUKo",
-  yearly: "price_1UcvCfAuhDoZqdULmIMb4sf9",
-  founding: "price_1Ucv3TAuhDoZqdULEoU7I98s"
+  gbp: {
+    monthly: "price_1Ucv26AuhDoZqdULzQzSgUKo",
+    yearly: "price_1UcvCfAuhDoZqdULmIMb4sf9",
+    founding: "price_1Ucv3TAuhDoZqdULEoU7I98s"
+  },
+  usd: { monthly: "", yearly: "", founding: "" }
 };
 const STRIPE_LIVE_PRICES = {
-  monthly: "price_1UcwifAk70HtJekA71sq0yK3",
-  yearly: "price_1UcwkaAk70HtJekAGgCUoNPR",
-  founding: "price_1UcwmOAk70HtJekAtuhNMtYS"
+  gbp: {
+    monthly: "price_1UcwifAk70HtJekA71sq0yK3",
+    yearly: "price_1UcwkaAk70HtJekAGgCUoNPR",
+    founding: "price_1UcwmOAk70HtJekAtuhNMtYS"
+  },
+  usd: { monthly: "", yearly: "", founding: "" }
 };
 const STRIPE_LIVE = /^(sk|rk)_live_/.test(String(process.env.STRIPE_SECRET_KEY || ""));
-const STRIPE_PRICES = STRIPE_LIVE ? STRIPE_LIVE_PRICES : STRIPE_TEST_PRICES;
+const STRIPE_PRICE_SETS = STRIPE_LIVE ? STRIPE_LIVE_PRICES : STRIPE_TEST_PRICES;
+const CURRENCIES = Object.keys(STRIPE_PRICE_SETS).filter((c) =>
+  ["monthly", "yearly", "founding"].every((p) => STRIPE_PRICE_SETS[c][p])
+);
+// What the website shows for each currency
+const DISPLAY = {
+  usd: { symbol: "$", monthly: "$7", yearly: "$59", yearlyMonthly: "about $4.92 a month", yearlySave: "save 30%", founding: "$49",
+         taxNote: "Sales tax or VAT is added at checkout where it applies." },
+  gbp: { symbol: "£", monthly: "£6", yearly: "£48", yearlyMonthly: "£4 a month", yearlySave: "save 33%", founding: "£39",
+         taxNote: "Prices include VAT where it applies." }
+};
+function priceFor(plan, currency) {
+  const c = CURRENCIES.includes(currency) ? currency : (CURRENCIES.includes("gbp") ? "gbp" : CURRENCIES[0]);
+  return STRIPE_PRICE_SETS[c] && STRIPE_PRICE_SETS[c][plan];
+}
+// Backwards compatible: GBP set
+const STRIPE_PRICES = STRIPE_PRICE_SETS.gbp;
 
 // ---------- Stripe API (form-encoded REST, no SDK needed) ----------
 function formEncode(obj, prefix, out = []) {
@@ -148,6 +171,6 @@ function cors(req, res) {
 }
 
 module.exports = {
-  FREE_LIMIT, FOUNDING_LIMIT, PRICES, STRIPE_PRICES, STRIPE_LIVE, stripe, redis, getUser, setUser, isPro,
+  FREE_LIMIT, FOUNDING_LIMIT, PRICES, STRIPE_PRICES, STRIPE_LIVE, CURRENCIES, DISPLAY, priceFor, stripe, redis, getUser, setUser, isPro,
   usageKey, verifyGoogle, paddle, cors
 };

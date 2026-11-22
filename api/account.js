@@ -23,19 +23,27 @@ module.exports = async function handler(req, res) {
   try {
     if (action === "config") {
       const sold = Number(await L.redis("GET", "founding:sold")) || 0;
+      const country = String(req.headers["x-vercel-ip-country"] || "").toUpperCase();
+      const preferred = country === "GB" ? "gbp" : "usd";
+      const currency = L.CURRENCIES.includes(preferred) ? preferred : (L.CURRENCIES[0] || "gbp");
+      res.setHeader("Cache-Control", "no-store");
       return res.status(200).json({
         provider: "stripe",
         mode: L.STRIPE_LIVE ? "live" : "test",
         ready: !!process.env.STRIPE_SECRET_KEY,
+        currencies: L.CURRENCIES,
+        currency,
+        display: L.DISPLAY,
+        foundingLimit: L.FOUNDING_LIMIT,
         foundingLeft: Math.max(0, L.FOUNDING_LIMIT - sold)
       });
     }
 
     if (action === "checkout" && req.method === "POST") {
-      const { plan, email: rawEmail } = await readJson(req);
+      const { plan, email: rawEmail, currency } = await readJson(req);
       const email = String(rawEmail || "").trim().toLowerCase();
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: "Please enter a valid email." });
-      const price = L.STRIPE_PRICES[plan];
+      const price = L.priceFor(plan, String(currency || "").toLowerCase());
       if (!price) return res.status(400).json({ error: "Unknown plan." });
 
       const user = await L.getUser(email);
