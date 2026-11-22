@@ -27,7 +27,11 @@ const STRIPE_LIVE_PRICES = {
     yearly: "price_1UcwkaAk70HtJekAGgCUoNPR",
     founding: "price_1UcwmOAk70HtJekAtuhNMtYS"
   },
-  usd: { monthly: "", yearly: "", founding: "" }
+  usd: {
+    monthly: "price_1UePS3Ak70HtJekAOJMeBKC8",
+    yearly: "price_1UePO1Ak70HtJekAESGgxOap",
+    founding: "price_1UePIPAk70HtJekADhF03NOi"
+  }
 };
 const STRIPE_LIVE = /^(sk|rk)_live_/.test(String(process.env.STRIPE_SECRET_KEY || ""));
 const STRIPE_PRICE_SETS = STRIPE_LIVE ? STRIPE_LIVE_PRICES : STRIPE_TEST_PRICES;
