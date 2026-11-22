@@ -41,7 +41,7 @@
         <div class="plans">
           <div class="plan">
             <h3>Pro Monthly</h3>
-            <div class="price">£6<small>/month</small></div>
+            <div class="price"><span data-p="monthly">£6</span><small>/month</small></div>
             <div class="per">cancel any time</div>
             <ul><li>Unlimited clips</li><li>Google Sheets and Notion</li><li>Priority support</li></ul>
             <button class="btn ghost" data-plan="monthly">Choose monthly</button>
@@ -49,20 +49,21 @@
           <div class="plan featured">
             <span class="tag">Best value</span>
             <h3>Pro Yearly</h3>
-            <div class="price">£48<small>/year</small></div>
-            <div class="per">£4 a month, save 33%</div>
+            <div class="price"><span data-p="yearly">£48</span><small>/year</small></div>
+            <div class="per"><span data-p="yearlyMonthly">£4 a month</span>, <span data-p="yearlySave">save 33%</span></div>
             <ul><li>Unlimited clips</li><li>Google Sheets and Notion</li><li>Priority support</li></ul>
             <button class="btn" data-plan="yearly">Choose yearly</button>
           </div>
           <div class="plan" id="foundingCard">
             <h3>Founding member</h3>
-            <div class="price">£39<small> once</small></div>
-            <div class="per" id="foundingLeft">first 100 users only</div>
+            <div class="price"><span data-p="founding">£39</span><small> once</small></div>
+            <div class="per" id="foundingLeft">limited to the first 50 founders</div>
             <ul><li>Everything in Pro</li><li>Lifetime access, no subscription</li><li>Help shape the roadmap</li></ul>
             <button class="btn ghost" data-plan="founding">Become a founder</button>
           </div>
         </div>
-        <p class="note">Prices include VAT where it applies. 14-day money-back guarantee, see our <a href="/refunds">Refund Policy</a>.</p>
+        <p class="note" id="curSwitch" style="margin-top:14px"></p>
+        <p class="note"><span data-p="taxNote">Prices include VAT where it applies.</span> 14-day money-back guarantee, see our <a href="/refunds">Refund Policy</a>.</p>
         <p class="note" id="err" style="color:#dc2626"></p>
       </div>
 
@@ -95,12 +96,30 @@
   catch (e) { $("err").textContent = "Checkout is unavailable right now. Please try again shortly."; return; }
   if (!cfg.ready) { $("err").textContent = "Checkout isn't switched on yet."; return; }
 
+  let currency = cfg.currency;
+  try { const saved = localStorage.getItem("lc_currency"); if (saved && cfg.currencies.includes(saved)) currency = saved; } catch (e) {}
+  function applyCurrency() {
+    const d = cfg.display[currency];
+    document.querySelectorAll("[data-p]").forEach((el) => { if (d[el.dataset.p]) el.textContent = d[el.dataset.p]; });
+    const sw = $("curSwitch");
+    if (cfg.currencies.length > 1) {
+      sw.innerHTML = cfg.currencies.map((c) => c === currency
+        ? `<b>${c.toUpperCase()}</b>` : `<a href="#" data-cur="${c}">${c.toUpperCase()}</a>`).join(" · ");
+      sw.querySelectorAll("[data-cur]").forEach((a) => a.addEventListener("click", (ev) => {
+        ev.preventDefault(); currency = a.dataset.cur;
+        try { localStorage.setItem("lc_currency", currency); } catch (e) {}
+        applyCurrency();
+      }));
+    } else sw.textContent = "";
+  }
+  applyCurrency();
+
   if (cfg.foundingLeft <= 0) {
     $("foundingCard").classList.add("soldout");
     $("foundingLeft").textContent = "sold out";
     $("foundingCard").querySelector("button").disabled = true;
-  } else if (cfg.foundingLeft < 100) {
-    $("foundingLeft").textContent = `only ${cfg.foundingLeft} of 100 left`;
+  } else {
+    $("foundingLeft").textContent = `only ${cfg.foundingLeft} of ${cfg.foundingLimit} places left`;
   }
 
   document.querySelectorAll("[data-plan]").forEach((btn) => {
@@ -117,7 +136,7 @@
         const r = await fetch("/api/account?action=checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan: btn.dataset.plan, email })
+          body: JSON.stringify({ plan: btn.dataset.plan, email, currency })
         });
         const data = await r.json();
         if (!r.ok || !data.url) throw new Error(data.error || "Couldn't start checkout.");
