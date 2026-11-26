@@ -19,11 +19,11 @@
     <h1>Privacy Policy</h1>
     <p class="updated">Last updated: 26 November 2026</p>
 
-    <p>LeadClip ("LeadClip", "we", "us") is a Chrome extension that saves the LinkedIn profile you are viewing to your own Google Sheet or Notion database. This policy explains what information we handle, why, and your choices. LeadClip is operated by Edward Kennedy, trading as LeadClip, a sole trader based in the United Kingdom.</p>
+    <p>LeadClip ("LeadClip", "we", "us") is a Chrome extension that saves the LinkedIn profile you are viewing to your own Google Sheet, Notion database or HubSpot account. This policy explains what information we handle, why, and your choices. LeadClip is operated by Edward Kennedy, trading as LeadClip, a sole trader based in the United Kingdom.</p>
 
     <h2>1. The short version</h2>
     <ul>
-      <li>Profiles you clip go <strong>directly from your browser to your own Google Sheet or Notion database</strong>. We do not keep a copy of your leads.</li>
+      <li>Profiles you clip go <strong>directly from your browser to your own Google Sheet, Notion database or HubSpot account</strong>. We do not keep a copy of your leads.</li>
       <li>We store only what we need to run your account: your Google account ID and email, your plan, and how many clips you've used this month.</li>
       <li>We never sell your data, and we don't use it for advertising.</li>
     </ul>
@@ -35,7 +35,8 @@
       <tr><td>Clip count and plan (Free / Pro / Founding)</td><td>To apply the free monthly limit and your subscription</td><td>Our account database</td></tr>
       <tr><td>Google Sheets / Drive access token</td><td>To create your LeadClip sheet and add rows to it</td><td>Managed by Google Chrome on your device; not stored by us</td></tr>
       <tr><td>Notion access token and database ID</td><td>To add clipped profiles to the Notion database you choose</td><td>Stored in the extension on your device</td></tr>
-      <tr><td>Profile details you clip (name, headline, company, location, profile URL, and on Pro any email, phone or website shown in the Contact info panel you have opened)</td><td>To save them to your sheet or Notion database</td><td>Sent from your browser to Google or Notion only; never stored on our servers</td></tr>
+      <tr><td>HubSpot access and refresh tokens, and your HubSpot account ID (Pro)</td><td>To add clipped profiles to your HubSpot contacts</td><td>Stored in the extension on your device; passed through our server only to sign in and renew access, never stored there</td></tr>
+      <tr><td>Profile details you clip (name, headline, company, location, profile URL, and on Pro any email, phone or website shown in the Contact info panel you have opened)</td><td>To save them to your sheet, Notion database or HubSpot</td><td>Sent from your browser to Google, Notion or HubSpot only; never stored on our servers. Emails and phone numbers are never sent to HubSpot</td></tr>
       <tr><td>List of profile links you've saved</td><td>To warn you if you're about to save the same profile twice</td><td>Stored in the extension on your device only</td></tr>
       <tr><td>Payment details</td><td>To process Pro or Founding purchases</td><td>Handled by our payment provider; we never see your full card details</td></tr>
     </table>
@@ -47,8 +48,9 @@
     <p>If you connect Google Sheets, LeadClip asks for permission to create and edit only the spreadsheets that LeadClip itself creates (the <code>drive.file</code> scope). LeadClip cannot see or change your other files.</p>
     <p>LeadClip's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements. We use Google user data only to provide LeadClip's features, we do not transfer it to others except as needed to provide those features or as required by law, we do not use it for advertising, and no human reads it unless you ask us to for support.</p>
 
-    <h2>5. Notion data</h2>
+    <h2>5. Notion and HubSpot data</h2>
     <p>If you connect Notion, you choose which pages LeadClip can access on Notion's own approval screen. LeadClip uses this access only to create a leads database and add the profiles you clip. You can remove LeadClip's access at any time in Notion under <em>Settings → Connections</em>.</p>
+    <p><strong>HubSpot (Pro).</strong> If you connect HubSpot, you approve LeadClip's access on HubSpot's own screen. LeadClip uses it only to add or update a contact for each profile you clip (name, job title, company, location, website and LinkedIn link) and to create one "LinkedIn profile (LeadClip)" contact field used to spot duplicates. It never sends email addresses or phone numbers to HubSpot. You can disconnect in LeadClip's Settings, or remove LeadClip in HubSpot under <em>Settings → Integrations → Connected apps</em>.</p>
 
     <h2>6. Service providers</h2>
     <p>We use a small number of trusted providers to run LeadClip: Vercel (hosting), a database provider for account records, and Stripe (payment processing). They process data only on our instructions.</p>
@@ -79,7 +81,7 @@
 
   <footer>
     <div class="wrap">
-      <div>© 2026 LeadClip<div class="disclaimer">Not affiliated with LinkedIn, Google or Notion.</div></div>
+      <div>© 2026 LeadClip<div class="disclaimer">Not affiliated with LinkedIn, Google, Notion or HubSpot.</div></div>
       <div><a href="/">Home</a><a href="/terms">Terms</a><a href="/refunds">Refunds</a></div>
     </div>
   </footer>
