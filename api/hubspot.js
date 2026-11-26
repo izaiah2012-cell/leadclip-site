@@ -6,7 +6,8 @@
 // The secret never leaves this server; the extension only ever sees access and refresh tokens.
 
 const EXTENSION_ID = "dcmobmfcanclieokkkffndnefjagmhem";
-const REDIRECT_URI = `https://${EXTENSION_ID}.chromiumapp.org/`;
+// HubSpot sends people back to this page on the LeadClip site, which hands the code to the extension
+const REDIRECT_URI = "https://leadclip.vercel.app/hubspot-connected";
 const SCOPES = [
   "oauth",
   "crm.objects.contacts.read",

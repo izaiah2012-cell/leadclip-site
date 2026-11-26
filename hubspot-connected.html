@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Connecting HubSpot – LeadClip</title>
+  <link rel="icon" href="/assets/favicon.png" />
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/assets/logo.png" alt="" />LeadClip</a>
+    </div>
+  </header>
+
+  <main class="legal" style="text-align:center">
+    <h1 id="title">Connecting HubSpot…</h1>
+    <p id="msg">One moment while LeadClip finishes connecting.</p>
+  </main>
+
+  <script>
+    (function () {
+      var EXTENSION_ID = "dcmobmfcanclieokkkffndnefjagmhem";
+      var q = new URLSearchParams(location.search);
+      var code = q.get("code"), state = q.get("state"), error = q.get("error");
+      // Take the one-time code out of the address bar straight away
+      history.replaceState(null, "", "/hubspot-connected");
+
+      function show(title, msg) {
+        document.getElementById("title").textContent = title;
+        document.getElementById("msg").textContent = msg;
+      }
+
+      if (error || !code) {
+        show("HubSpot wasn't connected", (q.get("error_description") || "The connection was cancelled.") + " You can close this tab and try again from LeadClip's Settings.");
+        return;
+      }
+      if (!window.chrome || !chrome.runtime || !chrome.runtime.sendMessage) {
+        show("Open this in Chrome", "Please connect HubSpot from LeadClip's Settings in Chrome, with the LeadClip extension installed.");
+        return;
+      }
+      try {
+        chrome.runtime.sendMessage(EXTENSION_ID, { type: "HUBSPOT_CODE", code: code, state: state }, function (res) {
+          if (chrome.runtime.lastError || !res) {
+            show("Couldn't reach LeadClip", "Make sure the LeadClip extension is installed and switched on, then click Connect HubSpot in its Settings again.");
+          } else if (res.ok) {
+            show("HubSpot connected ✓", "New clips will go to HubSpot. You can close this tab.");
+          } else {
+            show("HubSpot wasn't connected", (res.error || "Something went wrong.") + " Please try again from LeadClip's Settings.");
+          }
+        });
+      } catch (e) {
+        show("Couldn't reach LeadClip", "Make sure the LeadClip extension is installed and switched on, then try again.");
+      }
+    })();
+  </script>
+</body>
+</html>
