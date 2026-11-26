@@ -19,7 +19,11 @@ const STRIPE_TEST_PRICES = {
     yearly: "price_1UcvCfAuhDoZqdULmIMb4sf9",
     founding: "price_1Ucv3TAuhDoZqdULEoU7I98s"
   },
-  usd: { monthly: "", yearly: "", founding: "" }
+  usd: {
+    monthly: "price_1UePZKAuhDoZqdULLYtuT06Y",
+    yearly: "price_1UePXeAuhDoZqdULyqPkx4sW",
+    founding: "price_1UePVjAuhDoZqdUL2xbvuBS6"
+  }
 };
 const STRIPE_LIVE_PRICES = {
   gbp: {
